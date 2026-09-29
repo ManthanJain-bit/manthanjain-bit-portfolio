@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Manthan Jain - 3D Portfolio World</title>
+  <link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+  <!-- Day/Night toggle -->
+  <button id="dn-toggle" onclick="toggleDayNight()" title="Toggle Day/Night">🌙 NIGHT</button>
+
+  <!-- Resume Download -->
+  <div id="resume-btns" style="position:fixed;top:14px;right:160px;z-index:9100;display:flex;gap:6px;">
+    <button onclick="viewResume()" style="background:linear-gradient(135deg,rgba(0,224,255,0.15),rgba(0,255,179,0.08));border:1px solid rgba(0,224,255,0.6);color:#00e0ff;font-family:'Orbitron',monospace;font-size:11px;font-weight:bold;padding:6px 14px;cursor:pointer;letter-spacing:0.08em;clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));">📄 RESUME</button>
+  </div>
+
+  <!-- Mobile Touch Controls -->
+  <div id="mobile-controls">
+    <!-- Left joystick: MOVE -->
+    <div id="joy-left-zone">
+      <div id="joy-left">
+        <div class="joy-base"></div>
+        <div class="joy-knob" id="joy-left-knob"></div>
+        <div class="joy-label">MOVE</div>
+      </div>
+    </div>
+    <!-- Right joystick: LOOK -->
+    <div id="joy-right-zone">
+      <div id="joy-right">
+        <div class="joy-base"></div>
+        <div class="joy-knob" id="joy-right-knob"></div>
+        <div class="joy-label">LOOK</div>
+      </div>
+    </div>
+    <!-- Interact button -->
+    <div id="btn-interact" onclick="mobileInteract()">
+      <span class="btn-icon">⬡</span>ENTER
+    </div>
+    <!-- Close panel button -->
+    <div id="btn-close-panel" onclick="attemptCloseInfoPanel()">✕</div>
+  </div>
+  <!-- Certificate Modal -->
+  <div id="cert-modal">
+    <div id="cert-modal-inner">
+      <button id="cert-close" onclick="closeCertModal()">✕</button>
+      <div id="cert-modal-title"></div>
+      <div id="cert-modal-content"></div>
+    </div>
+  </div>
+  <canvas id="neon-rain"></canvas>
+  <div id="scanlines"></div>
+  <div id="cyber-cursor"></div>
+  <!-- Top Nav -->
+  <div id="top-nav" aria-hidden="true">
+    <div class="nav-inner" id="nav-inner">
+      <div class="nav-item" data-zone="home">HOME</div>
+      <div class="nav-item" data-zone="about">ABOUT</div>
+      <div class="nav-item" data-zone="experience">EXPERIENCE</div>
+      <div class="nav-item" data-zone="skills">SKILLS</div>
+      <div class="nav-item" data-zone="projects">PROJECTS</div>
+      <div class="nav-item" data-zone="research">RESEARCH</div>
+      <div class="nav-item" data-zone="contact">CONTACT</div>
+    </div>
+  </div>
+
+  <!-- Welcome Screen -->
+  <div id="welcome-screen">
+    <img class="welcome-photo" src="assets/welcome-photo.jpg" alt="Manthan Jain" style="object-position:top center;">
+    <h1><span id="typewriter"></span><span class="cursor-blink">_</span></h1>
+    <p>
+      AI/ML &amp; Game Developer<br />
+      Welcome to my 3D Portfolio World
+    </p>
+    <button id="start-btn" onclick="enterWorld()">ENTER THE WORLD</button>
+  </div>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" class="hidden">
+    <div class="loading-text">LOADING WORLD...</div>
+    <div class="loading-bar"><div class="loading-progress" id="loading-progress"></div></div>
+  </div>
+
+  <!-- Canvas Container -->
+  <div id="canvas-container"></div>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div id="location">Location: Home</div>
+    <div id="instruction" style="display:none;">Press E to interact</div>
+  </div>
+
+  <!-- Controls Guide -->
+  <div id="controls">
+    <h3>CONTROLS</h3>
+    <p><strong>W</strong> - Move Forward</p>
+    <p><strong>S</strong> - Move Backward</p>
+    <p><strong>A / D</strong> - Strafe Left / Right</p>
+    <p><strong>MOUSE</strong> - Look Around</p>
+    <p><strong>E</strong> - Enter Cube</p>
+    <p><strong>SCROLL</strong> - Scroll inside the Cube panel</p>
+    <p><strong>ENTER</strong> - Exit panel (only after reaching the end)</p>
+  </div>
+
+  <!-- Music Toggle -->
+  <div id="music-btn" onclick="toggleMusic()" title="Toggle ambient music"
+    style="position:fixed;bottom:20px;right:20px;z-index:200;width:44px;height:44px;
+    background:rgba(0,0,0,0.6);border:1px solid rgba(0,255,179,0.5);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;cursor:pointer!important;
+    font-size:20px;transition:all 0.2s;box-shadow:0 0 14px rgba(0,255,179,0.2);">🔇</div>
+
+  <!-- Crosshair -->
+  <div id="crosshair"></div>
+
+  <!-- Info Panel -->
+  <div id="info-panel" aria-modal="true" role="dialog">
+    <button class="close-btn" onclick="attemptCloseInfoPanel()">EXIT</button>
+    <div id="info-content"></div>
+    <div id="panel-hint">Scroll to the end to unlock EXIT → then press <strong>ENTER</strong>.</div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="js/main.js" defer></script>
+
+  <audio id="type-sound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" preload="auto"></audio>
+  <!-- Synthwave background music — multiple fallbacks -->
+  <audio id="bg-music" loop preload="auto">
+    <!-- Track 1: Cyberpunk Synthwave -->
+    <source src="https://cdn.pixabay.com/audio/2023/03/13/audio_5c0c4cf4a6.mp3" type="audio/mpeg">
+    <!-- Track 2: Dark Electronic -->
+    <source src="https://cdn.pixabay.com/audio/2022/08/23/audio_d16737dc28.mp3" type="audio/mpeg">
+    <!-- Track 3: Retro Synth -->
+    <source src="https://cdn.pixabay.com/audio/2022/03/15/audio_8cb3b8b0e5.mp3" type="audio/mpeg">
+    <!-- Track 4: Night Drive synthwave -->
+    <source src="https://cdn.pixabay.com/audio/2023/06/08/audio_43c30f6b83.mp3" type="audio/mpeg">
+  </audio>
+</body>
+</html>
